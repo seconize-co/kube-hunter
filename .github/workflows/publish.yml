@@ -43,6 +43,14 @@ jobs:
           echo ${{ secrets.ACR_PWD }} | docker login --username seconize --password-stdin seconize.azurecr.io
           sudo docker tag sze-k8s-audit seconize.azurecr.io/kube-hunter
           sudo docker push seconize.azurecr.io/kube-hunter
+      - name: Slack Notification
+        uses: rtCamp/action-slack-notify@master
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_COLOR: '#3278BD'
+          SLACK_MESSAGE: 'Docker Image Push completed '
+          SLACK_TITLE: Sensor Build
+          SLACK_USERNAME: seconize
       - name: Get version
         id: get_version
         uses: crazy-max/ghaction-docker-meta@v1
