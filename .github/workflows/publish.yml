@@ -41,7 +41,7 @@ jobs:
         run: |
           sudo apt install gnupg2 pass -y
           echo ${{ secrets.ACR_PWD }} | docker login --username seconize --password-stdin seconize.azurecr.io
-          sudo docker tag sze-k8s-audit seconize.azurecr.io/kube-hunter
+          sudo docker tag sze-k8s-pt seconize.azurecr.io/kube-hunter
           sudo docker push seconize.azurecr.io/kube-hunter
       - name: Slack Notification
         uses: rtCamp/action-slack-notify@master
