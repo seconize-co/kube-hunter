@@ -1,6 +1,6 @@
 version: "3.3"
 services:
-  kube-hunter:
+  sze-k8s-pt:
     image:sze-k8s-pt:latest
     volumes:
       - ./bin:/root/bin
