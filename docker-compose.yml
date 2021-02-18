@@ -1,0 +1,9 @@
+version: "3.3"
+services:
+  kube-hunter:
+    image:sze-k8s-pt:latest
+    volumes:
+      - ./bin:/root/bin
+    build:
+      context: .
+      dockerfile: Dockerfile
