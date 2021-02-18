@@ -37,20 +37,6 @@ jobs:
           registry: public.ecr.aws
           username: ${{ secrets.ECR_ACCESS_KEY_ID }}
           password: ${{ secrets.ECR_SECRET_ACCESS_KEY }}
-      - name: Docker Push to Azure Container Registry
-        run: |
-          sudo apt install gnupg2 pass -y
-          echo ${{ secrets.ACR_PWD }} | docker login --username seconize --password-stdin seconize.azurecr.io
-          sudo docker tag sze-k8s-pt seconize.azurecr.io/kube-hunter
-          sudo docker push seconize.azurecr.io/kube-hunter
-      - name: Slack Notification
-        uses: rtCamp/action-slack-notify@master
-        env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-          SLACK_COLOR: '#3278BD'
-          SLACK_MESSAGE: 'Docker Image Push completed '
-          SLACK_TITLE: Sensor Build
-          SLACK_USERNAME: seconize
       - name: Get version
         id: get_version
         uses: crazy-max/ghaction-docker-meta@v1
@@ -77,3 +63,34 @@ jobs:
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
+      - name: Setup Docker
+        run: |
+          echo "Setting up Docker"
+          sudo apt-get update -y
+          sudo apt-get install \
+             apt-transport-https \
+             ca-certificates \
+             curl \
+             gnupg-agent \
+             software-properties-common virtualenv virtualenvwrapper -y
+             sudo dpkg-reconfigure --frontend noninteractive tzdata
+          curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+          sudo add-apt-repository \
+             "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+             $(lsb_release -cs) \
+             stable"
+          sudo apt-get update -y
+          sudo apt-get install docker-ce docker-ce-cli containerd.io -y
+          sudo curl -L https://github.com/docker/compose/releases/download/1.27.4/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+      - name: docker build
+        run: |
+          git clone https://github.com/seconize-co/sze-k8s-pt.git
+          cd sze-k8s-pt
+          sudo docker-compose up --build
+      - name: Docker Push to Azure Container Registry
+        run: |
+          sudo apt install gnupg2 pass -y
+          echo ${{ secrets.ACR_PWD }} | docker login --username seconize --password-stdin seconize.azurecr.io
+          sudo docker tag sze-k8s-pt seconize.azurecr.io/sensor/sze-k8s-pt
+          sudo docker push seconize.azurecr.io/sensor/sze-k8s-pt
